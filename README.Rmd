@@ -27,7 +27,10 @@ remotes::install_github("nset-ornl/covidmodeldata")
 
 ## Download and Format New York Times Data
 
-This is a basic example which shows you how to solve a common problem:
+The fields ending in `_mdl` are the modeled data. The fields not ending with `mdl` 
+match the originally reported values. If a state is skiped such as Rhode Island, the `_mdl` values for that
+state will match the original values while values for other states will be the modeled values.
+
 ```{r example-run, echo=FALSE, message=FALSE, warning=FALSE}
 library(covidmodeldata)
 library(tidyverse)
