@@ -1,0 +1,19 @@
+Package: covidmodeldata
+Type: Package
+Title: An R Package for organizing the data used in the county level covid19 model
+Version: 0.1.0
+Author: Jesse Piburn
+Maintainer: Jesse Piburn <piburnjo@ornl.gov>
+Description: Downloads and formats data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.1
+Imports: 
+    dplyr,
+    tidyr,
+    zoo,
+    tidyselect,
+    readr,
+    janitor,
+    magrittr
