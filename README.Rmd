@@ -22,14 +22,23 @@ The goal of covidmodeldata is to download and format data
 ## Installation
 
 ``` r
-remotes::install_github("covidmodeldata")
+remotes::install_github("nset-ornl/covidmodeldata")
 ```
 
-## Example
+## Download and Format New York Times Data
 
 This is a basic example which shows you how to solve a common problem:
+```{r example-run, echo=FALSE, message=FALSE, warning=FALSE}
+library(covidmodeldata)
+library(tidyverse)
 
-```{r example}
+df <- get_nyt() %>%
+  format_nyt(
+    skip_assignment = c("44") # don't assign Rhode Island cases
+    )
+```
+
+```{r example, eval=FALSE}
 library(covidmodeldata)
 library(tidyverse)
 
@@ -38,5 +47,23 @@ df <- get_nyt() %>%
     skip_assignment = c("44") # don't assign Rhode Island cases
     )
 
-
+glimpse(df)
 ```
+
+```{r example-table, echo=FALSE}
+glimpse(df)
+```
+
+## ACS data and Geometries
+```{r}
+glimpse(acs_data)
+```
+
+
+## Landscan USA Population Data
+```{r}
+glimpse(landscan_usa)
+```
+
+
+
