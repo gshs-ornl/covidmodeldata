@@ -119,6 +119,25 @@ acs_geom <- get_acs(
 acs_data <- left_join(acs_geom, acs_data_only, by = "geoid")
 
 
+# cleanup county_name where there is county and city ----------------------
+acs_data <-
+acs_data %>%
+  group_by(state_name, county_name) %>%
+  mutate(
+    n = n(),
+    county_name_clean = gsub(", .*", "", county_name_long),
+  ) %>%
+  ungroup() %>%
+  mutate(
+    county_name = if_else(n > 1, county_name_clean, county_name)
+  ) %>%
+  select(
+    -n,
+    -county_name_clean
+  ) %>%
+  sf::st_as_sf()
+
+
 # save to data ------------------------------------------------------------
 usethis::use_data(acs_data, overwrite = TRUE)
 
