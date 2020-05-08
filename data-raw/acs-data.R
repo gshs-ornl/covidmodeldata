@@ -49,7 +49,7 @@ acs_data_nyc <- get_acs(
   )
 
 # non-shifted geometry just to get extra attributes -----------------------
-acs_data_only <- get_acs(
+acs_data_county <- get_acs(
   geography = "county",
   variables = acs_vars,
   state = NULL, # get everystate
@@ -60,7 +60,7 @@ acs_data_only <- get_acs(
   janitor::clean_names() %>%
   st_drop_geometry() %>%
   mutate(
-    state_name = gsub(".*, ", "", name_y),
+    state_name = gsub(".*, ", "", name_y)
   ) %>%
   select(
     geoid = geoid,
@@ -70,6 +70,57 @@ acs_data_only <- get_acs(
     county_name_long = name_y,
     starts_with("acs_")
   ) %>%
+  group_by(state_name, county_name) %>%
+  mutate(
+    n = n(),
+    county_name_clean = gsub(", .*", "", county_name_long),
+  ) %>%
+  ungroup() %>%
+  mutate(
+    county_name = if_else(n > 1, county_name_clean, county_name)
+  ) %>%
+  select(
+    -n,
+    -county_name_clean
+  )
+
+
+# generate name look up table ---------------------------------------------
+acs_names <-
+acs_data_county %>%
+  select(-starts_with("acs_")) %>%
+  mutate(
+    county_fips = geoid,
+    geoid = if_else(county_fips %in% nyc_county_fips, nyc_fips, county_fips)
+  ) %>%
+  select(
+    geoid,
+    state_fips,
+    state_name,
+    county_fips,
+    county_name,
+    county_name_long
+  )
+
+
+# with summarised nyc -----------------------------------------------------
+acs_names_summarised_nyc <-
+  acs_names %>%
+  mutate(
+    county_name = if_else(geoid == "36NYC", "New York City", county_name)
+  ) %>%
+  distinct(
+    geoid,
+    state_fips,
+    state_name,
+    county_name
+  )
+
+
+
+# now back to joining the acs data ----------------------------------------
+acs_data_only <-
+  acs_data_county %>%
   filter(
     !(geoid %in% nyc_county_fips)
   ) %>%
@@ -114,30 +165,12 @@ acs_geom <- get_acs(
   ungroup()
 
 
-
 # join cleaned data with cleaned geometries -------------------------------
 acs_data <- left_join(acs_geom, acs_data_only, by = "geoid")
 
 
-# cleanup county_name where there is county and city ----------------------
-acs_data <-
-acs_data %>%
-  group_by(state_name, county_name) %>%
-  mutate(
-    n = n(),
-    county_name_clean = gsub(", .*", "", county_name_long),
-  ) %>%
-  ungroup() %>%
-  mutate(
-    county_name = if_else(n > 1, county_name_clean, county_name)
-  ) %>%
-  select(
-    -n,
-    -county_name_clean
-  ) %>%
-  sf::st_as_sf()
-
-
 # save to data ------------------------------------------------------------
-usethis::use_data(acs_data, overwrite = TRUE)
+usethis::use_data(acs_data,  overwrite = TRUE)
+usethis::use_data(acs_names, overwrite = TRUE)
+usethis::use_data(acs_names_summarised_nyc, overwrite = TRUE)
 

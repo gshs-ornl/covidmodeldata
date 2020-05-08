@@ -11,7 +11,8 @@
 #' @importFrom magrittr %>%
 #' @param admin character. Geographic level of the observations. One of county, state, country, or all.
 #' @param us_only logical. If `TRUE` return results only within the United States. Default is `TRUE`
-#'
+#' @param summarise_nyc logical. If `FALSE` do not conflate the 5 New York City Boroughs. Default is `TRUE`.
+#'        Conflation is done by taking the median value of each attributes across the 5 Boroughs
 #' @return df data frame of percent change in visits to places like grocery stores and parks within a geographic area.
 #'
 #' @details
@@ -38,7 +39,7 @@
 #'
 #' @export
 #' @md
-get_google_mobility <- function(admin = c("county", "state", "country", "all"), us_only = TRUE) {
+get_google_mobility <- function(admin = c("county", "state", "country", "all"), us_only = TRUE, summarise_nyc = TRUE) {
 
   admin <- match.arg(admin)
 
@@ -72,11 +73,7 @@ get_google_mobility <- function(admin = c("county", "state", "country", "all"), 
       ggl_grocery_and_pharm = grocery_and_pharmacy_percent_change_from_baseline,
     )
 
-  if (us_only) df <- dplyr::filter(df, country_code == "US")
-
-  if (admin == "county")  df <- dplyr::filter(df, !is.na(county_name))
-  if (admin == "state")   df <- dplyr::filter(df, is.na(county_name), !is.na(state_name))
-  if (admin == "country") df <- dplyr::filter(df, is.na(county_name), is.na(state_name))
+  df <- google_translate(df, admin = admin, us_only = us_only, summarise_nyc = summarise_nyc)
 
   df
 }
@@ -86,7 +83,7 @@ get_google_mobility <- function(admin = c("county", "state", "country", "all"), 
 
 
 
-#' Get Latest Mobility Data from Google
+#' Get Latest Mobility Data from Descartes Labs
 #'
 #' [Descartes Labs](https://descarteslabs.com/) is releasing mobility statistics (representing the distance a
 #' typical member of a given population moves in a day) at the US admin1 (state)

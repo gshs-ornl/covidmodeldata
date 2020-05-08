@@ -16,7 +16,18 @@ get_nyt <- function(admin = c("county", "state")) {
     url <- "https://github.com/nytimes/covid-19-data/raw/master/us-states.csv"
   }
 
-  df <- readr::read_csv(url)
+  df <- readr::read_csv(
+    url,
+    col_types = readr::cols(
+      date   = readr::col_date(format = ""),
+      county = readr::col_character(),
+      state  = readr::col_character(),
+      fips   = readr::col_character(),
+      cases  = readr::col_double(),
+      deaths = readr::col_double()
+      )
+    )
+
   df <- janitor::clean_names(df)
 
   df
@@ -312,8 +323,36 @@ distribute_unassigned_nyt <- function(df, probdf, distribute_unknowns = FALSE,
 
       updated_state_df
     })
-    out_df <- dplyr::bind_rows(state_list)
+
+    out_df <- dplyr::bind_rows(state_list) %>%
+      dplyr::filter(
+        county != "Unknown"
+      )
   }
+
+  # save this for when name standardization is done here
+  # out_df %>% dplyr::filter(
+  #   cases_mdl > 0,
+  #   county != "Unknown"
+  # ) %>%
+  #   dplyr::select(-tidyselect::matches("night_pop|day_pop|state_|county_")) %>%
+  #   dplyr::left_join(acs_names_summarised_nyc, by = c("fips" = "geoid")) %>%
+  #   dplyr::transmute(
+  #     geoid = fips,
+  #     state_fips,
+  #     state_name = state,
+  #     county_name = county,
+  #     date,
+  #     total_cases = cases,
+  #     total_deaths = deaths,
+  #     new_cases,
+  #     new_deaths,
+  #     total_cases_mdl = cases_mdl,
+  #     total_deaths_mdl = deaths_mdl,
+  #     new_cases_mdl,
+  #     new_deaths_mdl
+  #   )
+
 
 
   out_df %>% dplyr::filter(
@@ -335,4 +374,5 @@ distribute_unassigned_nyt <- function(df, probdf, distribute_unknowns = FALSE,
       new_cases_mdl,
       new_deaths_mdl
     )
+
 }

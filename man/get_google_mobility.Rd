@@ -6,13 +6,17 @@
 \usage{
 get_google_mobility(
   admin = c("county", "state", "country", "all"),
-  us_only = TRUE
+  us_only = TRUE,
+  summarise_nyc = TRUE
 )
 }
 \arguments{
 \item{admin}{character. Geographic level of the observations. One of county, state, country, or all.}
 
 \item{us_only}{logical. If \code{TRUE} return results only within the United States. Default is \code{TRUE}}
+
+\item{summarise_nyc}{logical. If \code{FALSE} do not conflate the 5 New York City Boroughs. Default is \code{TRUE}.
+Conflation is done by taking the median value of each attributes across the 5 Boroughs}
 }
 \value{
 df data frame of percent change in visits to places like grocery stores and parks within a geographic area.

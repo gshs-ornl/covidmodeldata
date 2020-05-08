@@ -2,7 +2,7 @@
 % Please edit documentation in R/mobility-data.R
 \name{get_descartes_mobility}
 \alias{get_descartes_mobility}
-\title{Get Latest Mobility Data from Google}
+\title{Get Latest Mobility Data from Descartes Labs}
 \usage{
 get_descartes_mobility(admin = c("county", "state", "all"))
 }

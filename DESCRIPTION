@@ -1,7 +1,7 @@
 Package: covidmodeldata
 Type: Package
 Title: An R Package for organizing the data used in the county level covid19 model
-Version: 0.1.3
+Version: 0.2.0
 Author: Jesse Piburn
 Maintainer: Jesse Piburn <piburnjo@ornl.gov>
 Description: Downloads and formats data.
