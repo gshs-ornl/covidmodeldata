@@ -3,5 +3,6 @@
 export(format_nyt)
 export(get_descartes_mobility)
 export(get_google_mobility)
+export(get_jh)
 export(get_nyt)
 importFrom(magrittr,"%>%")
