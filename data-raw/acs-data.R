@@ -168,7 +168,6 @@ acs_geom <- get_acs(
 # join cleaned data with cleaned geometries -------------------------------
 acs_data <- left_join(acs_geom, acs_data_only, by = "geoid")
 
-
 # save to data ------------------------------------------------------------
 usethis::use_data(acs_data,  overwrite = TRUE)
 usethis::use_data(acs_names, overwrite = TRUE)

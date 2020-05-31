@@ -1,6 +1,7 @@
 library(tidyverse)
 
 landscan_usa <- readr::read_csv("data-raw/static-sources/landscan-usa-counties-2018.csv")
+prison_gdb <- "landscan-usa-raw/Prison_Boundaries.gdb/568b79a7e7194fcab0e3285549505e3f.gdb"
 
 # create fips for NYC -----------------------------------------------------
 nyc_fips <- "36NYC"
@@ -23,8 +24,6 @@ landscan_usa <-
 
 
 
-
-
 landscan_state <- readr::read_csv("data-raw/static-sources/landscan-usa-counties-2018.csv") %>%
   mutate(
     fips = stringr::str_sub(st_cnty, end = 2)
@@ -40,6 +39,30 @@ landscan_state <- readr::read_csv("data-raw/static-sources/landscan-usa-counties
   )
 
 
+# prison population -------------------------------------------------------
+prison_df <- st_read(prison_gdb, stringsAsFactors = FALSE) %>%
+  janitor::clean_names() %>%
+  st_drop_geometry() %>%
+  filter(
+    status == "OPEN"
+  ) %>%
+  mutate(
+    geoid = if_else(countyfips %in% nyc_county_fips, nyc_fips, countyfips),
+    pop_adjusted = if_else(population < 0, as.numeric(0), as.numeric(population))
+  ) %>%
+  group_by(geoid) %>%
+  summarise(
+    prison_pop = sum(pop_adjusted, na.rm = TRUE),
+    prison_count = n()
+  ) %>%
+  ungroup()
+
+
+landscan_usa <- left_join(landscan_usa, prison_df, by = "geoid") %>%
+  mutate(
+    prison_count = if_else(is.na(prison_count), 0, as.numeric(prison_count)),
+    prison_pop = if_else(is.na(prison_pop), 0, prison_pop)
+  )
 
 
 usethis::use_data(landscan_usa, overwrite = TRUE)
